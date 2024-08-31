@@ -30,7 +30,7 @@ One simple and clear fact (rule/pattern) that if applied to the input, the outpu
 """ # AND ALSO the test output (for the corresponding test input) that you would expect to get if your rule is applied correctly.
 
 
-def main(model, task_id, max_rollouts, max_tokens, debug=False):
+def main(model, task_id, max_rollouts, max_tokens, temperature, debug=False):
 
     # Load task
     challenges, solutions = load_tasks_from_file(task_sets['training'])
@@ -45,6 +45,7 @@ def main(model, task_id, max_rollouts, max_tokens, debug=False):
             max_rollouts=max_rollouts,
             max_tokens=max_tokens,
             max_children=20,
+            temperature=temperature,
         )
     elif model == 'llama3.1':
         mctsr = MCTSrLlama318B(
@@ -52,14 +53,15 @@ def main(model, task_id, max_rollouts, max_tokens, debug=False):
             max_rollouts=max_rollouts,
             max_tokens=max_tokens,
             max_children=20,
+            temperature=temperature,
         )
     else:
         raise ValueError(f"Model {model} not supported")
     
     mctsr.run()
+    print("\n" + "="*50 + "\nTree:\n")
     mctsr.print()
-    print("\nFINAL ANSWER:")
-    print(mctsr.get_best_answer())
+    print("\n" + "="*50 + f"\nFINAL ANSWER: \n\n{mctsr.get_best_answer()}")
 
 
 if __name__ == "__main__":
@@ -69,17 +71,22 @@ if __name__ == "__main__":
     parser.add_argument("-t", "--task_id", type=str, help="Task ID", default="0520fde7")
     parser.add_argument("-r", "--max_rollouts", type=int, help="Number of rollouts", default=30)
     parser.add_argument("-k", "--max_tokens", type=int, help="Max tokens", default=500)
+    parser.add_argument("-T", "--temperature", type=float, help="Temperature for sampling", default=0.1)
     args = parser.parse_args()
 
+    print("="*50 + "\nPARAMETERS")
     print(f"Model: {args.model}")
     print(f"Task ID: {args.task_id}")
     print(f"max_rollouts: {args.max_rollouts}")
     print(f"max_tokens: {args.max_tokens}")
+    print(f"temperature: {args.temperature}")
+    print("="*50 + "\n")
 
     main(
         args.model,
         args.task_id, 
         args.max_rollouts, 
         args.max_tokens, 
-        args.debug
+        args.temperature,
+        args.debug,
         )

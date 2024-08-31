@@ -142,6 +142,7 @@ class MCTSr(BaseModel):
     problem: str
     max_rollouts: int
     max_tokens: int = 1000
+    temperature: float = 0.1
     exploration_constant: float = 1.0
     max_children: int = 2
     epsilon: float = 1e-10
@@ -336,7 +337,7 @@ class MCTSr(BaseModel):
             node.add_child(child)
             self.self_evaluate(child)
             self.backpropagate(child)
-            print("="*30 + f"\nRollout {i} complete (Q={child.Q:.2f})\n{child.answer}")
+            print("\n" + "="*30 + f"\nRollout {i} complete (Q={child.Q:.2f})\n{child.answer}\n")
 
         return self.get_best_answer()
 
@@ -398,6 +399,7 @@ class MCTSrLlama318B(MCTSr):
             model=llama3_1_8b_prompt_config.model,
             base_url=llama3_1_8b_prompt_config.base_url,
             max_tokens=self.max_tokens,
+            temperature=self.temperature,
         )
         assert response.choices[0].message.content is not None
         return response.choices[0].message.content
@@ -431,6 +433,7 @@ class MCTSrLlama318B(MCTSr):
             model=llama3_1_8b_prompt_config.model,
             base_url=llama3_1_8b_prompt_config.base_url,
             max_tokens=self.max_tokens,
+            temperature=self.temperature,
         )
         critique = critique_response.choices[0].message.content
         assert critique is not None
@@ -456,6 +459,7 @@ class MCTSrLlama318B(MCTSr):
             model=llama3_1_8b_prompt_config.model,
             base_url=llama3_1_8b_prompt_config.base_url,
             max_tokens=self.max_tokens,
+            temperature=self.temperature,
         )
         refined_answer = refined_answer_response.choices[0].message.content
         assert refined_answer is not None
@@ -495,6 +499,7 @@ class MCTSrLlama318B(MCTSr):
                     model=llama3_1_8b_prompt_config.model,
                     base_url=llama3_1_8b_prompt_config.base_url,
                     max_tokens=self.max_tokens,
+                    temperature=self.temperature,
                 )
                 assert response.choices[0].message.content is not None
                 content = response.choices[0].message.content.strip()
@@ -549,6 +554,7 @@ class MCTSrGPT4o(MCTSr):
             ],
             model=gpt_4o_prompt_config.model,
             max_tokens=self.max_tokens,
+            temperature=self.temperature,
         )
         assert response.choices[0].message.content is not None
         return response.choices[0].message.content
@@ -582,6 +588,7 @@ class MCTSrGPT4o(MCTSr):
             ],
             model=gpt_4o_prompt_config.model,
             max_tokens=self.max_tokens,
+            temperature=self.temperature,
         )
         critique = critique_response.choices[0].message.content
         assert critique is not None
@@ -606,6 +613,7 @@ class MCTSrGPT4o(MCTSr):
             ],
             model=gpt_4o_prompt_config.model,
             max_tokens=self.max_tokens,
+            temperature=self.temperature,
             response_format={"type": "json_object"},
         )
         refined_answer = RefineResponse.model_validate_json(
@@ -649,6 +657,7 @@ class MCTSrGPT4o(MCTSr):
                     messages=messages,
                     model=gpt_4o_prompt_config.model,
                     max_tokens=self.max_tokens,
+                    temperature=self.temperature,
                 )
                 assert response.choices[0].message.content is not None
                 return int(response.choices[0].message.content)

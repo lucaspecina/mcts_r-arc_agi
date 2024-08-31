@@ -44,7 +44,7 @@ def openai_chat_completion(
     messages: list[ChatCompletionMessageParam],
     model: str,
     base_url: str | None = None,
-    temperature: float = 0.8,
+    temperature: float = 0.1,
     **kwargs,
 ) -> ChatCompletion:
     client = _get_openai_client(base_url)
@@ -53,19 +53,5 @@ def openai_chat_completion(
         messages=messages,
         temperature=temperature,
         **kwargs,
-    )
-    return response
-
-
-# TODO: OLLAMA implementation (not tested)
-def ollama_chat_completion(
-    messages: list[ChatCompletionMessageParam],
-    model: str,
-    temperature: float = 0.8,
-    **kwargs,
-):
-    llm = ChatOllama(model=model, temperature=temperature, max_tokens=4000)
-    response = llm.invoke(
-        {"llm_name": "llama3.1", "messages": messages},
     )
     return response
